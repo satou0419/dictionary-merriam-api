@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./style.css";
 
 const Dictionary = () => {
@@ -12,45 +12,50 @@ const Dictionary = () => {
 
   const apiKey = "95454221-2935-4778-b4e6-be2ca5ede0cb"; // Use your actual API key
 
-  const handleSearchClick = async () => {
-    const url = `https://www.dictionaryapi.com/api/v3/references/sd2/json/${inputWord}?key=${apiKey}`;
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      if (data.length) {
-        const firstResult = data[0];
-        setDefinition(
-          firstResult.def[0]?.sseq[0][0][1]?.dt[0][1] || "No definition found"
-        );
-        setPronunciation(firstResult.hwi.prs[0]?.mw || "");
-        setPartOfSpeech(firstResult.fl || "");
-        setShortDefinitions(firstResult.shortdef || []);
+  useEffect(() => {
+    const fetchDefinition = async () => {
+      if (!inputWord) return;
+      const url = `https://www.dictionaryapi.com/api/v3/references/sd2/json/${inputWord}?key=${apiKey}`;
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data.length) {
+          const firstResult = data[0];
+          setDefinition(
+            firstResult.def[0]?.sseq[0][0][1]?.dt[0][1] || "No definition found"
+          );
+          setPronunciation(firstResult.hwi.prs[0]?.mw || "");
+          setPartOfSpeech(firstResult.fl || "");
+          setShortDefinitions(firstResult.shortdef || []);
 
-        const audio = firstResult.hwi.prs[0]?.sound?.audio;
-        const subdirectory = audio?.startsWith("bix")
-          ? "bix"
-          : audio?.startsWith("gg")
-          ? "gg"
-          : audio?.match(/^[^a-zA-Z]/)
-          ? "number"
-          : audio?.charAt(0);
+          const audio = firstResult.hwi.prs[0]?.sound?.audio;
+          const subdirectory = audio?.startsWith("bix")
+            ? "bix"
+            : audio?.startsWith("gg")
+            ? "gg"
+            : audio?.match(/^[^a-zA-Z]/)
+            ? "number"
+            : audio?.charAt(0);
 
-        setAudioUrl(
-          audio
-            ? `https://media.merriam-webster.com/audio/prons/en/us/mp3/${subdirectory}/${audio}.mp3`
-            : ""
-        );
-        setError("");
-      } else {
-        setError("No definition found.");
+          setAudioUrl(
+            audio
+              ? `https://media.merriam-webster.com/audio/prons/en/us/mp3/${subdirectory}/${audio}.mp3`
+              : ""
+          );
+          setError("");
+        } else {
+          setError("No definition found.");
+          clearFields();
+        }
+      } catch (error) {
+        console.error("Error fetching the definition:", error);
+        setError("Error fetching the definition.");
         clearFields();
       }
-    } catch (error) {
-      console.error("Error fetching the definition:", error);
-      setError("Error fetching the definition.");
-      clearFields();
-    }
-  };
+    };
+
+    fetchDefinition();
+  }, [inputWord, apiKey]);
 
   const clearFields = () => {
     setDefinition("");
@@ -80,13 +85,13 @@ const Dictionary = () => {
           onChange={handleInputChange}
           placeholder="Enter a word..."
         />
-        <button onClick={handleSearchClick}>Search</button>
         <button onClick={handlePlayClick} disabled={!audioUrl}>
           Play Pronunciation
         </button>
       </div>
       {error && <p className="error">{error}</p>}
       <div className="result-container">
+        <p className="label">Word:</p>
         <span className="word-value">{inputWord}</span>
         <p className="label">Pronunciation:</p>
         <span className="value">{pronunciation}</span>
