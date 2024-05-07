@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Center Closing Animation</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #282c34;
+      }
+
+      .popup {
+        background-color: white;
+        padding: 20px;
+        max-width: 300px;
+        text-align: center;
+        border-radius: 10px;
+        animation: centerClosingAnimation 0.5s ease-out forwards;
+      }
+
+      @keyframes centerClosingAnimation {
+        0% {
+          opacity: 1;
+          transform: translate(0, 0) scale(1);
+        }
+        25% {
+          transform: translate(50%, 0) scale(0.8);
+        }
+        50% {
+          transform: translate(0, 50%) scale(0.6);
+        }
+        75% {
+          transform: translate(-50%, 0) scale(0.4);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(0, -50%) scale(0.2);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="popup">
+      <p>This is your popup content.</p>
+      <button onclick="closePopup()">Close</button>
+    </div>
+
+    <script>
+      function closePopup() {
+        document.querySelector(".popup").style.animation =
+          "centerClosingAnimation 0.5s ease-out";
+      }
+    </script>
+  </body>
+</html>
